@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: rgb(11 11 15);
+  --color-foreground: rgb(248 248 255);
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+body {
+  background-color: rgb(11, 11, 15);
+  color: rgb(248, 248, 255);
+  font-family: 'Inter', sans-serif;
+}
+
+.font-display {
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.bg-card-base {
+  background: rgba(16, 16, 28, 0.95);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.glow-gold {
+  box-shadow: 0 0 30px rgba(255, 190, 0, 0.15), 0 0 60px rgba(255, 190, 0, 0.05);
+}
+
+.glow-purple {
+  box-shadow: 0 0 30px rgba(124, 77, 255, 0.2), 0 0 60px rgba(124, 77, 255, 0.08);
+}
+
+.glow-blue {
+  box-shadow: 0 0 30px rgba(64, 120, 255, 0.2);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFD700, #FF8C00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #9B6FFF, #BF40FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.grid-pattern {
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.hero-glow {
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124, 77, 255, 0.25) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 50%, rgba(255, 190, 0, 0.1) 0%, transparent 50%);
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
