@@ -9,6 +9,7 @@ export interface Card {
   type: "Troop" | "Spell" | "Building" | "Champion";
   description: string;
   emoji: string;
+  imageUrl?: string;
   winRate?: number;
   usageRate?: number;
 }
