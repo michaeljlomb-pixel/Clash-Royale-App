@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cdn.clashroyale.com",
+        hostname: "api-assets.clashroyale.com",
       },
     ],
   },
