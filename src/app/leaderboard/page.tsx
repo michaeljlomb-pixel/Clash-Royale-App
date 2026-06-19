@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingUp, TrendingDown, Minus, Globe, Users, Trophy, Search, Swords, Star } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Users, Trophy, Search, Swords } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 
 const WORKER = "https://clash-royale-proxy.michaeljlomb.workers.dev";
@@ -59,7 +59,7 @@ export default function LeaderboardPage() {
 
     let url = "";
     if (tab === "clanscore") url = `${WORKER}/leaderboard/clans`;
-    else if (tab === "clanwars") url = `${WORKER}/leaderboard/clanwars/${selectedCountry.id}`;
+    else if (tab === "clanwars") url = `${WORKER}/leaderboard/clanwars`;
     else url = `${WORKER}/leaderboard/players/${selectedCountry.id}`;
 
     fetch(url)
@@ -82,7 +82,7 @@ export default function LeaderboardPage() {
 
   const getScore = (e: Entry) => {
     if (tab === "clanscore") return e.clanScore || 0;
-    if (tab === "clanwars") return e.clanWarTrophies || e.clanScore || 0;
+    if (tab === "clanwars") return e.clanWarTrophies || 0;
     return e.trophies || 0;
   };
 
@@ -113,18 +113,17 @@ export default function LeaderboardPage() {
     return <span className="text-white/20 text-[10px]"><Minus className="w-2.5 h-2.5" /></span>;
   };
 
-  const podiumOrder = [1, 0, 2];
   const top3 = filtered.slice(0, 3);
+  const podiumOrder = [1, 0, 2];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold text-white">Leaderboard</h1>
           <p className="text-white/40 text-sm mt-1">
             {tab === "clanscore" && "Global top 1000 clans by clan score"}
-            {tab === "clanwars" && `Top clans by war trophies — ${selectedCountry.name}`}
+            {tab === "clanwars" && "Global top clans ranked by real war trophies"}
             {tab === "players" && `Top players by trophies — ${selectedCountry.name}`}
           </p>
         </div>
@@ -142,10 +141,10 @@ export default function LeaderboardPage() {
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap">
         {([
-          { id: "clanscore", label: "Clan Score", icon: <Trophy className="w-4 h-4" /> },
-          { id: "clanwars", label: "Clan Wars", icon: <Swords className="w-4 h-4" /> },
-          { id: "players", label: "Players", icon: <Users className="w-4 h-4" /> },
-        ] as const).map(t => (
+          { id: "clanscore" as Tab, label: "Clan Score", icon: <Trophy className="w-4 h-4" /> },
+          { id: "clanwars" as Tab, label: "Clan Wars", icon: <Swords className="w-4 h-4" /> },
+          { id: "players" as Tab, label: "Players", icon: <Users className="w-4 h-4" /> },
+        ]).map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
@@ -156,8 +155,8 @@ export default function LeaderboardPage() {
         ))}
       </div>
 
-      {/* Country selector for war/players tabs */}
-      {(tab === "clanwars" || tab === "players") && (
+      {/* Country selector — only for players tab */}
+      {tab === "players" && (
         <div className="flex gap-2 flex-wrap">
           {TOP_COUNTRIES.map(country => (
             <button
@@ -211,7 +210,10 @@ export default function LeaderboardPage() {
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-white/40 text-sm">Loading leaderboard...</div>
+          <div className="p-8 text-center">
+            <div className="text-white/40 text-sm mb-1">Loading leaderboard...</div>
+            {tab === "clanwars" && <div className="text-white/20 text-xs">Fetching war trophies for top clans, this may take a moment</div>}
+          </div>
         ) : error ? (
           <div className="p-8 text-center text-white/25 text-sm">No data available</div>
         ) : filtered.length === 0 ? (
