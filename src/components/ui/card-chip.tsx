@@ -23,8 +23,8 @@ export function CardChip({ card, showElixir = true, size = "md", className }: Ca
       : card.rarity === "Epic"
       ? "border-[rgba(191,64,255,0.5)] shadow-[0_0_10px_rgba(191,64,255,0.2)]"
       : card.rarity === "Rare"
-      ? "border-[rgba(74,144,226,0.5)] shadow-[0_0_10px_rgba(74,144,226,0.2)]"
-      : "border-[rgba(168,168,184,0.4)]";
+      ? "border-[rgba(255,140,30,0.6)] shadow-[0_0_10px_rgba(255,140,30,0.2)]"
+      : "border-[rgba(64,144,255,0.5)] shadow-[0_0_8px_rgba(64,144,255,0.15)]";
 
   return (
     <div className={cn(
