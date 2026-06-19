@@ -27,15 +27,16 @@ function getCardBorderClass(rarity: Rarity): string {
   if (rarity === "Legendary") return "legendary-border";
   if (rarity === "Champion") return "border border-[rgba(255,215,0,0.6)] shadow-[0_0_20px_rgba(255,215,0,0.25)]";
   if (rarity === "Epic") return "border border-[rgba(191,64,255,0.5)] shadow-[0_0_16px_rgba(191,64,255,0.15)]";
-  if (rarity === "Rare") return "border border-[rgba(74,144,226,0.5)]";
-  return "border border-white/8";
+  if (rarity === "Rare") return "border border-[rgba(255,140,30,0.6)] shadow-[0_0_12px_rgba(255,140,30,0.2)]";
+  return "border border-[rgba(64,144,255,0.5)] shadow-[0_0_8px_rgba(64,144,255,0.15)]";
 }
 
 function getCardBgClass(rarity: Rarity): string {
   if (rarity === "Legendary") return "bg-[rgba(80,220,140,0.05)]";
   if (rarity === "Champion") return "bg-[rgba(255,215,0,0.06)]";
   if (rarity === "Epic") return "bg-[rgba(191,64,255,0.06)]";
-  return "bg-white/4";
+  if (rarity === "Rare") return "bg-[rgba(255,140,30,0.05)]";
+  return "bg-[rgba(64,144,255,0.05)]";
 }
 
 export default function CardsPage() {
