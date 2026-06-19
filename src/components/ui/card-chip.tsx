@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ElixirPip } from "./elixir-pip";
@@ -10,30 +12,25 @@ interface CardChipProps {
   className?: string;
 }
 
-const rarityBorder: Record<string, string> = {
-  Common: "border-[rgba(168,168,184,0.4)]",
-  Rare: "border-[rgba(74,144,226,0.5)]",
-  Epic: "border-[rgba(191,64,255,0.5)]",
-  Legendary: "border-[rgba(255,215,0,0.5)]",
-  Champion: "border-[rgba(255,107,53,0.5)]",
-};
-
-const rarityGlow: Record<string, string> = {
-  Common: "",
-  Rare: "shadow-[0_0_10px_rgba(74,144,226,0.2)]",
-  Epic: "shadow-[0_0_10px_rgba(191,64,255,0.2)]",
-  Legendary: "shadow-[0_0_12px_rgba(255,215,0,0.25)]",
-  Champion: "shadow-[0_0_12px_rgba(255,107,53,0.25)]",
-};
-
 export function CardChip({ card, showElixir = true, size = "md", className }: CardChipProps) {
   const isSmall = size === "sm";
+
+  const borderClass =
+    card.rarity === "Legendary"
+      ? "legendary-border"
+      : card.rarity === "Champion"
+      ? "border-[rgba(255,215,0,0.6)] shadow-[0_0_12px_rgba(255,215,0,0.3)]"
+      : card.rarity === "Epic"
+      ? "border-[rgba(191,64,255,0.5)] shadow-[0_0_10px_rgba(191,64,255,0.2)]"
+      : card.rarity === "Rare"
+      ? "border-[rgba(74,144,226,0.5)] shadow-[0_0_10px_rgba(74,144,226,0.2)]"
+      : "border-[rgba(168,168,184,0.4)]";
+
   return (
     <div className={cn(
       "relative group rounded-lg border bg-[rgba(255,255,255,0.04)] flex flex-col items-center justify-center overflow-hidden",
       "hover:bg-white/8 transition-all duration-200 cursor-pointer",
-      rarityBorder[card.rarity],
-      rarityGlow[card.rarity],
+      borderClass,
       isSmall ? "w-12 h-14" : "w-16 h-[76px]",
       className
     )}>
