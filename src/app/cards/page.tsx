@@ -23,11 +23,19 @@ function normalizeRarity(r: string): Rarity {
   return "Common";
 }
 
-function getRarityStyles(rarity: Rarity) {
-  if (rarity === "Legendary") return "bg-[rgba(255,215,0,0.08)] border border-[rgba(255,215,0,0.2)] shadow-[0_0_20px_rgba(255,215,0,0.1)]";
-  if (rarity === "Champion") return "bg-[rgba(255,107,53,0.08)] border border-[rgba(255,107,53,0.2)] shadow-[0_0_20px_rgba(255,107,53,0.1)]";
-  if (rarity === "Epic") return "bg-[rgba(191,64,255,0.08)] border border-[rgba(191,64,255,0.2)]";
-  return "bg-white/4 border border-white/8";
+function getCardBorderClass(rarity: Rarity): string {
+  if (rarity === "Legendary") return "legendary-border";
+  if (rarity === "Champion") return "border border-[rgba(255,215,0,0.6)] shadow-[0_0_20px_rgba(255,215,0,0.25)]";
+  if (rarity === "Epic") return "border border-[rgba(191,64,255,0.5)] shadow-[0_0_16px_rgba(191,64,255,0.15)]";
+  if (rarity === "Rare") return "border border-[rgba(74,144,226,0.5)]";
+  return "border border-white/8";
+}
+
+function getCardBgClass(rarity: Rarity): string {
+  if (rarity === "Legendary") return "bg-[rgba(80,220,140,0.05)]";
+  if (rarity === "Champion") return "bg-[rgba(255,215,0,0.06)]";
+  if (rarity === "Epic") return "bg-[rgba(191,64,255,0.06)]";
+  return "bg-white/4";
 }
 
 export default function CardsPage() {
@@ -109,7 +117,7 @@ export default function CardsPage() {
                 className="bg-[rgba(16,16,28,0.95)] border border-white/7 rounded-xl p-4 hover:border-white/18 transition-all duration-200 card-hover cursor-pointer group"
               >
                 <div className="relative mb-3">
-                  <div className={`w-full aspect-square rounded-xl flex items-center justify-center mb-1 overflow-hidden transition-transform duration-200 group-hover:scale-105 ${getRarityStyles(rarity)}`}>
+                  <div className={`w-full aspect-square rounded-xl flex items-center justify-center mb-1 overflow-hidden transition-transform duration-200 group-hover:scale-105 ${getCardBgClass(rarity)} ${getCardBorderClass(rarity)}`}>
                     <Image
                       src={card.iconUrls.medium}
                       alt={card.name}
