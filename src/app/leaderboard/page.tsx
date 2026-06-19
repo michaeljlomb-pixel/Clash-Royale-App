@@ -29,68 +29,25 @@ const TOP_COUNTRIES = [
   { id: "57000077", name: "🇪🇬 Egypt" },
 ];
 
-type Tab = "clanscore" | "clanwars" | "clanrating" | "players";
+type Tab = "clanscore" | "clanwars" | "players";
 
-interface ClanEntry {
+interface Entry {
   rank: number;
   previousRank: number;
   tag: string;
   name: string;
   clanScore?: number;
   clanWarTrophies?: number;
-  clanRating?: number;
-  members: number;
-  location: { name: string; countryCode?: string };
-}
-
-interface PlayerEntry {
-  rank: number;
-  previousRank: number;
-  tag: string;
-  name: string;
-  trophies: number;
+  trophies?: number;
+  members?: number;
+  location?: { name: string };
   clan?: { name: string };
 }
-
-const TAB_CONFIG: Record<Tab, { label: string; icon: React.ReactNode; endpoint: string; scoreKey: string; scoreLabel: string; description: string }> = {
-  clanscore: {
-    label: "Clan Score",
-    icon: <Trophy className="w-4 h-4" />,
-    endpoint: "/leaderboard/clans",
-    scoreKey: "clanScore",
-    scoreLabel: "Clan Score",
-    description: "Ranked by weighted trophy score of all members",
-  },
-  clanwars: {
-    label: "Clan Wars",
-    icon: <Swords className="w-4 h-4" />,
-    endpoint: "/leaderboard/clanwars",
-    scoreKey: "clanWarTrophies",
-    scoreLabel: "War Trophies",
-    description: "Ranked by Clan Wars medal count",
-  },
-  clanrating: {
-    label: "Clan Rating",
-    icon: <Star className="w-4 h-4" />,
-    endpoint: "/leaderboard/clanrating",
-    scoreKey: "clanRating",
-    scoreLabel: "Rating",
-    description: "Ranked by combined Ultimate Champion rating",
-  },
-  players: {
-    label: "Players",
-    icon: <Users className="w-4 h-4" />,
-    endpoint: "",
-    scoreKey: "trophies",
-    scoreLabel: "Trophies",
-    description: "Top players by trophy count per country",
-  },
-};
 
 export default function LeaderboardPage() {
   const [tab, setTab] = useState<Tab>("clanscore");
   const [selectedCountry, setSelectedCountry] = useState(TOP_COUNTRIES[0]);
-  const [data, setData] = useState<(ClanEntry | PlayerEntry)[]>([]);
+  const [data, setData] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -100,15 +57,16 @@ export default function LeaderboardPage() {
     setError(null);
     setData([]);
 
-    const url = tab === "players"
-      ? `${WORKER}/leaderboard/players/${selectedCountry.id}`
-      : `${WORKER}${TAB_CONFIG[tab].endpoint}`;
+    let url = "";
+    if (tab === "clanscore") url = `${WORKER}/leaderboard/clans`;
+    else if (tab === "clanwars") url = `${WORKER}/leaderboard/clanwars/${selectedCountry.id}`;
+    else url = `${WORKER}/leaderboard/players/${selectedCountry.id}`;
 
     fetch(url)
       .then(r => r.json())
       .then(d => {
-        if (d.error) {
-          setError("This leaderboard isn't available from the official API yet.");
+        if (d.error || d.reason) {
+          setError("This leaderboard isn't available right now.");
         } else {
           setData(d.items || []);
         }
@@ -120,16 +78,18 @@ export default function LeaderboardPage() {
       });
   }, [tab, selectedCountry]);
 
-  const filtered = data.filter((e: any) =>
-    e.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = data.filter(e => e.name.toLowerCase().includes(search.toLowerCase()));
 
-  const getScore = (entry: any) => {
-    if (tab === "players") return entry.trophies;
-    if (tab === "clanscore") return entry.clanScore;
-    if (tab === "clanwars") return entry.clanWarTrophies;
-    if (tab === "clanrating") return entry.clanRating;
-    return 0;
+  const getScore = (e: Entry) => {
+    if (tab === "clanscore") return e.clanScore || 0;
+    if (tab === "clanwars") return e.clanWarTrophies || e.clanScore || 0;
+    return e.trophies || 0;
+  };
+
+  const getScoreLabel = () => {
+    if (tab === "clanscore") return "Clan Score";
+    if (tab === "clanwars") return "War Trophies";
+    return "Trophies";
   };
 
   const getRankBg = (rank: number) => {
@@ -153,8 +113,8 @@ export default function LeaderboardPage() {
     return <span className="text-white/20 text-[10px]"><Minus className="w-2.5 h-2.5" /></span>;
   };
 
+  const podiumOrder = [1, 0, 2];
   const top3 = filtered.slice(0, 3);
-  const podiumOrder = [1, 0, 2]; // silver, gold, bronze
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -162,7 +122,11 @@ export default function LeaderboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold text-white">Leaderboard</h1>
-          <p className="text-white/40 text-sm mt-1">{TAB_CONFIG[tab].description}</p>
+          <p className="text-white/40 text-sm mt-1">
+            {tab === "clanscore" && "Global top 1000 clans by clan score"}
+            {tab === "clanwars" && `Top clans by war trophies — ${selectedCountry.name}`}
+            {tab === "players" && `Top players by trophies — ${selectedCountry.name}`}
+          </p>
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
@@ -177,20 +141,23 @@ export default function LeaderboardPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap">
-        {(Object.keys(TAB_CONFIG) as Tab[]).map(t => (
+        {([
+          { id: "clanscore", label: "Clan Score", icon: <Trophy className="w-4 h-4" /> },
+          { id: "clanwars", label: "Clan Wars", icon: <Swords className="w-4 h-4" /> },
+          { id: "players", label: "Players", icon: <Users className="w-4 h-4" /> },
+        ] as const).map(t => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-display font-semibold border transition-all ${tab === t ? "bg-[rgba(124,77,255,0.2)] text-[#9B6FFF] border-[rgba(124,77,255,0.4)]" : "bg-white/4 text-white/50 border-white/8 hover:bg-white/8"}`}
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-display font-semibold border transition-all ${tab === t.id ? "bg-[rgba(124,77,255,0.2)] text-[#9B6FFF] border-[rgba(124,77,255,0.4)]" : "bg-white/4 text-white/50 border-white/8 hover:bg-white/8"}`}
           >
-            {TAB_CONFIG[t].icon}
-            {TAB_CONFIG[t].label}
+            {t.icon} {t.label}
           </button>
         ))}
       </div>
 
-      {/* Country selector */}
-      {tab === "players" && (
+      {/* Country selector for war/players tabs */}
+      {(tab === "clanwars" || tab === "players") && (
         <div className="flex gap-2 flex-wrap">
           {TOP_COUNTRIES.map(country => (
             <button
@@ -204,7 +171,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {/* Error state */}
+      {/* Error */}
       {error && (
         <div className="bg-[rgba(239,68,68,0.08)] border border-red-500/20 rounded-xl p-6 text-center">
           <div className="text-red-400 font-display font-bold mb-1">Not Available</div>
@@ -216,20 +183,18 @@ export default function LeaderboardPage() {
       {!loading && !error && top3.length >= 3 && (
         <div className="grid grid-cols-3 gap-3">
           {podiumOrder.map(idx => {
-            const entry = top3[idx] as any;
+            const entry = top3[idx];
             if (!entry) return null;
-            const rank = entry.rank;
             return (
-              <div key={rank} className={`rounded-2xl border p-4 text-center card-hover cursor-pointer transition-all ${rank === 1 ? "bg-[rgba(255,215,0,0.06)] border-[rgba(255,215,0,0.2)] glow-gold" : "bg-[rgba(16,16,28,0.95)] border-white/8"}`}>
-                {rank === 1 && <Trophy className="w-5 h-5 text-[#FFD700] mx-auto mb-1" />}
-                <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center font-display font-bold text-lg mb-2 ${getRankBg(rank)}`}>
-                  {rank}
+              <div key={entry.rank} className={`rounded-2xl border p-4 text-center card-hover cursor-pointer ${entry.rank === 1 ? "bg-[rgba(255,215,0,0.06)] border-[rgba(255,215,0,0.2)] glow-gold" : "bg-[rgba(16,16,28,0.95)] border-white/8"}`}>
+                {entry.rank === 1 && <Trophy className="w-5 h-5 text-[#FFD700] mx-auto mb-1" />}
+                <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center font-display font-bold text-lg mb-2 ${getRankBg(entry.rank)}`}>
+                  {entry.rank}
                 </div>
                 <div className="font-display font-bold text-white text-sm truncate">{entry.name}</div>
-                {entry.location && <div className="text-white/40 text-[10px] mb-1">{entry.location.name}</div>}
-                {entry.tag && !entry.location && <div className="text-white/40 text-[10px] mb-1">{entry.tag}</div>}
-                <div className="font-display font-bold text-lg text-white">{formatNumber(getScore(entry) || 0)}</div>
-                <div className="text-white/30 text-[10px]">{TAB_CONFIG[tab].scoreLabel}</div>
+                <div className="text-white/40 text-[10px] mb-1">{entry.location?.name || entry.clan?.name || entry.tag}</div>
+                <div className="font-display font-bold text-lg text-white">{formatNumber(getScore(entry))}</div>
+                <div className="text-white/30 text-[10px]">{getScoreLabel()}</div>
               </div>
             );
           })}
@@ -242,16 +207,18 @@ export default function LeaderboardPage() {
           <div>#</div>
           <div>{tab === "players" ? "Player" : "Clan"}</div>
           <div className="hidden sm:block text-right">{tab === "players" ? "Clan" : "Location"}</div>
-          <div className="text-right">{TAB_CONFIG[tab].scoreLabel}</div>
+          <div className="text-right">{getScoreLabel()}</div>
         </div>
 
         {loading ? (
           <div className="p-8 text-center text-white/40 text-sm">Loading leaderboard...</div>
         ) : error ? (
           <div className="p-8 text-center text-white/25 text-sm">No data available</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-8 text-center text-white/25 text-sm">No results found</div>
         ) : (
           <div>
-            {filtered.slice(0, 200).map((entry: any) => (
+            {filtered.slice(0, 200).map(entry => (
               <div key={entry.tag} className="grid grid-cols-[48px_1fr_auto_auto] gap-4 px-5 py-3.5 border-b border-white/5 hover:bg-white/3 transition-colors cursor-pointer items-center last:border-0">
                 <div className={`font-display font-bold text-sm ${getRankColor(entry.rank)}`}>
                   {entry.rank <= 3 ? ["🥇", "🥈", "🥉"][entry.rank - 1] : entry.rank}
@@ -269,7 +236,7 @@ export default function LeaderboardPage() {
                   {entry.location?.name || entry.clan?.name || "—"}
                 </div>
                 <div className="text-right">
-                  <div className="font-display font-bold text-white/90 text-sm">{formatNumber(getScore(entry) || 0)}</div>
+                  <div className="font-display font-bold text-white/90 text-sm">{formatNumber(getScore(entry))}</div>
                   <RankChange curr={entry.rank} prev={entry.previousRank} />
                 </div>
               </div>
