@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ElixirPip } from "./elixir-pip";
 import type { Card } from "@/types";
@@ -29,14 +30,25 @@ export function CardChip({ card, showElixir = true, size = "md", className }: Ca
   const isSmall = size === "sm";
   return (
     <div className={cn(
-      "relative group rounded-lg border bg-[rgba(255,255,255,0.04)] flex flex-col items-center justify-center",
+      "relative group rounded-lg border bg-[rgba(255,255,255,0.04)] flex flex-col items-center justify-center overflow-hidden",
       "hover:bg-white/8 transition-all duration-200 cursor-pointer",
       rarityBorder[card.rarity],
       rarityGlow[card.rarity],
-      isSmall ? "w-12 h-14 text-xl" : "w-16 h-[76px] text-3xl",
+      isSmall ? "w-12 h-14" : "w-16 h-[76px]",
       className
     )}>
-      <span className={isSmall ? "text-xl" : "text-3xl"}>{card.emoji}</span>
+      {card.imageUrl ? (
+        <Image
+          src={card.imageUrl}
+          alt={card.name}
+          width={isSmall ? 48 : 64}
+          height={isSmall ? 56 : 76}
+          className="w-full h-full object-contain p-1"
+          unoptimized
+        />
+      ) : (
+        <span className={isSmall ? "text-xl" : "text-3xl"}>{card.emoji}</span>
+      )}
       {showElixir && (
         <ElixirPip cost={card.elixirCost} size="sm" className="absolute -bottom-2 -right-2 w-5 h-5 text-[10px]" />
       )}
